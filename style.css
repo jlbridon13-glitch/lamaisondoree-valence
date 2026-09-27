@@ -132,3 +132,5 @@ body{background:#f7f0e5}.hero{min-height:590px}.hero-image{min-height:590px}.her
 .reel-container .reel-embed iframe{position:absolute;left:0;top:-72px;display:block;width:100%!important;height:calc(100% + 150px)!important;margin:0!important;border:0!important}
 .reel-external{display:inline-block;margin-top:13px;color:#f0ce79;text-underline-offset:4px;font-size:.9rem}
 @media(max-width:650px){.reel-container .reel-embed{height:auto;aspect-ratio:9/16}}
+
+.footer-links a:has(.g-icon){display:inline-flex;align-items:center;gap:8px}.g-icon{width:23px;height:23px;flex:0 0 23px;background:#fff;padding:3px;border-radius:6px;object-fit:contain}
