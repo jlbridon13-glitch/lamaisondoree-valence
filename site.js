@@ -59,22 +59,34 @@ function nthWeekday(year,month,weekday,ordinal){
   const day=1+(weekday-firstDay+7)%7+(ordinal-1)*7;
   return new Date(Date.UTC(year,month,day,12));
 }
-function nextMonthly(weekday,ordinal){
+// Règles des rendez-vous : « jeudi-3 » = 3e jeudi du mois ;
+// « jeudi-apres-mercredi-2 » = le jeudi de la semaine qui suit le 2e mercredi (2e mercredi + 8 jours).
+function eventDateFor(rule,year,month){
+  const after=rule.match(/^(\w+)-apres-(\w+)-(\d)$/);
+  if(after){
+    const base=nthWeekday(year,month,eventWeekdays[after[2]],Number(after[3]));
+    const offset=(eventWeekdays[after[1]]-eventWeekdays[after[2]]+7)%7+7;
+    return new Date(base.getTime()+offset*86400000);
+  }
+  const [weekday,ordinalText]=rule.split('-');
+  return nthWeekday(year,month,eventWeekdays[weekday],Number(ordinalText));
+}
+function nextMonthly(rule){
   const today=parisToday();
   let year=today.year,month=today.month;
-  let date=nthWeekday(year,month,weekday,ordinal);
-  if(date.getUTCDate()<today.day){
+  let date=eventDateFor(rule,year,month);
+  const todayUTC=Date.UTC(today.year,today.month,today.day,12);
+  if(date.getTime()<todayUTC){
     month++;
     if(month>11){month=0;year++}
-    date=nthWeekday(year,month,weekday,ordinal);
+    date=eventDateFor(rule,year,month);
   }
   return date;
 }
 function updateEventDates(){
   document.querySelectorAll('[data-event-date]').forEach(node=>{
-    const [weekday,ordinalText]=node.dataset.eventDate.split('-');
-    const date=nextMonthly(eventWeekdays[weekday],Number(ordinalText));
-    node.textContent=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(date);
+    const date=nextMonthly(node.dataset.eventDate);
+    node.textContent=new Intl.DateTimeFormat('fr-FR',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(date);
     node.dateTime=date.toISOString().slice(0,10);
   });
 }
